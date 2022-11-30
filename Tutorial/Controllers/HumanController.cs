@@ -1,4 +1,5 @@
 ﻿using Core.Domain;
+using Core.Interface;
 using Infrastructure.Data.DBContext;
 using Infrastructure.Data.Entities;
 using Microsoft.AspNetCore.Http;
@@ -11,91 +12,57 @@ namespace Tutorial.Controllers
     [ApiController]
     public class HumanController : ControllerBase
     {
-        //private static List<Person> people = new List<Person>
-        //{
-        //    new Person
-        //    {
-        //      Id= 1,
-        //      FirstName = "Amir",
-        //      LastName = "Ashkani",
-        //      City = "Norway"
-        //    },
-        //    new Person
-        //    {
-        //      Id= 2,
-        //      FirstName = "Saghar",
-        //      LastName = "Ashkani",
-        //      City = "Norway"
-        //    }
-        //};
 
-        private readonly DataConnection _Connection;
-        public HumanController(DataConnection connection) 
+        private readonly IPerson _IP;
+        public HumanController(IPerson Person) 
         {
-        _Connection= connection;
+            _IP = Person;
         }
 
-
         [HttpPost]
-        public async Task<ActionResult<List<Person>>> Adding(TPerson person) 
+        public async Task<ActionResult<List<Person>>> Adding(Person person) 
         {
-            _Connection.People.Add(person);
-           await _Connection.SaveChangesAsync();
+            if (person == null)
+                return BadRequest("Your Model is Null");
 
-            var AddShowing = await _Connection.People.ToListAsync();
-            return Ok(AddShowing);
+            return Ok(_IP.AddPerson(person));
 
         }
 
         [HttpGet("{Id}")]
         public async Task<ActionResult<Person>> findingOut(int Id)
         {
-            var Select = await _Connection.People.FindAsync(Id);
+            if (_IP.findingOut(Id) == null)
+                return BadRequest("Not Found!");
 
-            if (Select == null)
-                return BadRequest("not found!");
-
-            return Ok(Select);
+            return Ok(_IP.findingOut(Id));
         }
 
         [HttpPut]
         public async Task<ActionResult<Person>> Updating(Person person)
         {
-            var changePerson = await _Connection.People.FindAsync(person.Id);
+            if (_IP.Updating(person) == null)
+                return BadRequest("Your Model is Null");
 
-            if (changePerson == null)
-                return BadRequest("not found!");
-
-            changePerson.FirstName = person.FirstName;
-            changePerson.LastName = person.LastName;
-            changePerson.City = person.City;
-
-            _Connection.People.Update(changePerson);
-            await _Connection.SaveChangesAsync();
-
-            return Ok(changePerson);
+            return Ok(_IP.Updating(person));
         }
 
         [HttpGet]
         public async Task<ActionResult<List<Person>>> presentation()
         {
-            var Showing = await _Connection.People.ToListAsync();
-            return Ok(Showing);
+            if (_IP.presentation() == null)
+                return BadRequest("You Dont Have data");
+
+            return Ok(_IP.presentation());
         }
 
         [HttpDelete("{Id}")]
         public async Task<ActionResult<List<Person>>> Deleted(int Id)
         {
-            var Select = await _Connection.People.FindAsync(Id);
+            if (_IP.Deleted(Id) == null)
+                return BadRequest("Not Found!");
 
-            if (Select == null)
-                return BadRequest("not found!");
-
-            _Connection.People.Remove(Select);
-            await _Connection.SaveChangesAsync();
-
-            var Showing = await _Connection.People.ToListAsync();
-            return Ok(Showing);
+            return Ok(_IP.Deleted(Id));
         }
 
     }

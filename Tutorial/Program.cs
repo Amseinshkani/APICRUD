@@ -1,4 +1,6 @@
+using Core.Interface;
 using Infrastructure.Data.DBContext;
+using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Common;
 
@@ -13,7 +15,10 @@ builder.Services.AddDbContext<DataConnection>(Options =>
 });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IPerson , SPerson>();
 
 var app = builder.Build();
 
